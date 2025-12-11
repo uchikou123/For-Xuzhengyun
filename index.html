@@ -1,1 +1,387 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>炫酷圣诞树</title>
+<style>
+  :root{
+    --bg1:#071028;
+    --bg2:#0b2340;
+    --treeGreen1:#0b7a33;
+    --treeGreen2:#0e5b29;
+    --gold:#f5d76e;
+    --light-size:12px;
+  }
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    -webkit-font-smoothing:antialiased;
+    background: linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:#fff;
+    overflow:hidden;
+  }
 
+  .stage{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    box-sizing:border-box;
+  }
+
+  .card{
+    width:min(920px,96vw);
+    height:min(1100px,96vh);
+    max-height:1200px;
+    background: radial-gradient(circle at 20% 10%, rgba(255,255,255,0.03), transparent 10%), rgba(0,0,0,0.12);
+    border-radius:18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.03) inset;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    touch-action: manipulation;
+  }
+
+  /* Snow */
+  .snow { position:absolute; inset:0; pointer-events:none; }
+  .snow i{
+    position:absolute;
+    top:-10%;
+    width:6px;height:6px;border-radius:50%;
+    background:rgba(255,255,255,0.9);
+    opacity:0.8;
+    filter:blur(0.2px);
+    animation:fall linear infinite;
+  }
+  @keyframes fall{
+    to{ transform: translateY(120vh) rotate(180deg); opacity:0.2; }
+  }
+
+  /* Tree container */
+  .tree-wrap{
+    width:78%;
+    max-width:720px;
+    aspect-ratio: 3/4;
+    display:grid;
+    place-items:center;
+    position:relative;
+    transform-origin:center;
+  }
+
+  /* star */
+  .star{
+    position:absolute;
+    top:6%;
+    left:50%;
+    transform:translateX(-50%);
+    width:96px;height:96px;
+    filter: drop-shadow(0 6px 10px rgba(250,210,80,0.2));
+  }
+  .star svg{ width:100%;height:100%; animation:twinkle 2.6s linear infinite; transform-origin:center; }
+  @keyframes twinkle{
+    0%{ transform:scale(1); opacity:1; filter:brightness(1.2); }
+    50%{ transform:scale(1.06); opacity:0.85; filter:brightness(1.6); }
+    100%{ transform:scale(1); opacity:1; filter:brightness(1.2); }
+  }
+
+  /* tree SVG */
+  svg.tree-svg{ width:86%; height:auto; display:block; transform:translateY(6%); }
+  .tree-body{
+    filter: drop-shadow(0 30px 30px rgba(3,20,10,0.6));
+  }
+  /* ornaments & lights */
+  .ornament{
+    transform-origin:center;
+    transition: transform 0.28s ease;
+    will-change:transform;
+  }
+  .ornament:active{ transform: scale(1.12); }
+
+  /* gift box */
+  .gifts{
+    position:absolute;
+    bottom:6%;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:12px;
+    align-items:flex-end;
+  }
+  .gift{
+    width:68px;height:52px;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.35);
+    transform-origin:center;
+  }
+
+  /* control */
+  .controls{
+    position:absolute;
+    right:12px;
+    bottom:12px;
+    display:flex;
+    gap:10px;
+    z-index:30;
+  }
+  .btn{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.06);
+    color:#fff;padding:10px 12px;border-radius:10px;font-size:13px;
+    display:flex;gap:8px;align-items:center;backdrop-filter:blur(6px);
+  }
+  .btn:active{ transform:translateY(1px); }
+
+  /* caption */
+  .caption{
+    position:absolute;
+    top:12px; left:12px;
+    font-weight:600;font-size:15px; opacity:0.95;
+  }
+
+  /* responsive tweaks */
+  @media (max-width:420px){
+    .star{ width:64px;height:64px; top:4%; }
+    .gifts .gift{ width:48px;height:38px; }
+    .btn{ padding:8px 10px; font-size:12px; border-radius:8px; }
+  }
+
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="card" id="card" role="application" aria-label="炫酷圣诞树演示 - 点击切换灯光">
+    <div class="caption">Merry Christmas 🎄 — 点击画面切换灯光</div>
+
+    <div class="tree-wrap" id="treeWrap">
+      <!-- Star -->
+      <div class="star" aria-hidden="true">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(32,32)">
+            <path d="M0,-12 L3,-4 12,-4 5,1 8,10 0,4 -8,10 -5,1 -12,-4 -3,-4 Z" fill="url(#g1)"/>
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#fff7d6"/>
+                <stop offset="50%" stop-color="#ffd86b"/>
+                <stop offset="100%" stop-color="#ffb84b"/>
+              </linearGradient>
+            </defs>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Tree SVG -->
+      <svg class="tree-svg" viewBox="0 0 600 800" aria-hidden="false" role="img">
+        <defs>
+          <linearGradient id="leafGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#2ecc71"/>
+            <stop offset="60%" stop-color="#0f7a3b"/>
+            <stop offset="100%" stop-color="#063b21"/>
+          </linearGradient>
+        </defs>
+
+        <!-- tree layers (three big triangles) -->
+        <g class="tree-body">
+          <path d="M300 120 L110 330 L490 330 Z" fill="url(#leafGrad)"/>
+          <path d="M300 240 L80 470 L520 470 Z" fill="url(#leafGrad)" opacity="0.98"/>
+          <path d="M300 370 L40 660 L560 660 Z" fill="url(#leafGrad)" opacity="0.96"/>
+          <!-- trunk -->
+          <rect x="260" y="660" width="80" height="90" rx="10" fill="#5b2d11"/>
+        </g>
+
+        <!-- ornaments (circles) -->
+        <g id="ornaments">
+          <!-- placed at various positions on the tree -->
+          <circle class="ornament light" cx="300" cy="200" r="10" fill="#ff5d6c" />
+          <circle class="ornament light" cx="240" cy="230" r="9" fill="#ffd36b" />
+          <circle class="ornament light" cx="360" cy="250" r="11" fill="#6ae3ff" />
+          <circle class="ornament light" cx="200" cy="320" r="10" fill="#ff6bf0" />
+          <circle class="ornament light" cx="420" cy="330" r="8" fill="#7dff7a" />
+          <circle class="ornament light" cx="300" cy="350" r="12" fill="#ffcf6b" />
+          <circle class="ornament light" cx="260" cy="420" r="10" fill="#3b9bff" />
+          <circle class="ornament light" cx="340" cy="420" r="9" fill="#ff7a7a" />
+          <circle class="ornament light" cx="190" cy="520" r="11" fill="#d01bff" />
+          <circle class="ornament light" cx="410" cy="520" r="10" fill="#ffd76e" />
+        </g>
+
+        <!-- some garland paths -->
+        <g stroke="#ffeaa7" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.9">
+          <path d="M140,300 q120,40 320,0" stroke-linejoin="round" stroke-opacity="0.6"/>
+          <path d="M100,420 q150,50 380,0" stroke-opacity="0.5"/>
+          <path d="M80,540 q170,60 420,0" stroke-opacity="0.45"/>
+        </g>
+
+      </svg>
+
+      <!-- gifts -->
+      <div class="gifts" aria-hidden="true">
+        <div class="gift" style="background:linear-gradient(180deg,#ff6b6b,#c93a3a)"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="#fff" d="M12 7l0 10M4 7h16" stroke="#fff" stroke-width="0"/></svg></div>
+        <div class="gift" style="background:linear-gradient(180deg,#ffe76e,#d59c34)"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="#6b3b00" d="M12 7l0 10M4 7h16" /></svg></div>
+        <div class="gift" style="background:linear-gradient(180deg,#6bd1ff,#1f9ad1)"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="#fff" d="M12 7l0 10M4 7h16" /></svg></div>
+      </div>
+    </div>
+
+    <!-- snow layer -->
+    <div class="snow" id="snow"></div>
+
+    <!-- controls -->
+    <div class="controls" id="controls">
+      <button class="btn" id="toggleLights" title="切换灯光">🎇 灯光</button>
+      <button class="btn" id="toggleMusic" title="播放 / 暂停背景音乐">🎵 音乐</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ---------- snow generation ---------- */
+const snow = document.getElementById('snow');
+const snowCount = Math.min(80, Math.max(28, Math.floor(window.innerWidth/6)));
+for(let i=0;i<snowCount;i++){
+  const s = document.createElement('i');
+  const size = (Math.random()*6)+3;
+  s.style.width = s.style.height = size + 'px';
+  s.style.left = Math.random()*100 + '%';
+  s.style.opacity = 0.5 + Math.random()*0.9;
+  s.style.animationDuration = (6 + Math.random()*10) + 's';
+  s.style.transform = 'translateY(-10vh) rotate(' + (Math.random()*360) + 'deg)';
+  s.style.animationDelay = (Math.random()*-20) + 's';
+  snow.appendChild(s);
+}
+
+/* ---------- lights flicker ---------- */
+const lights = Array.from(document.querySelectorAll('.ornament.light'));
+let lightsOn = true;
+function flickerOnce(el, delay){
+  const base = 0.5 + Math.random()*0.9;
+  el.style.transition = 'transform 0.18s ease, opacity 0.18s linear, filter 0.18s linear';
+  setTimeout(()=>{
+    el.style.opacity = 0.5 + Math.random()*0.7;
+    el.style.transform = 'scale(' + (0.92 + Math.random()*0.2) + ')';
+    el.style.filter = 'drop-shadow(0 8px 10px rgba(255,255,255,0.07)) saturate(1.6)';
+    setTimeout(()=>{ if(lightsOn){ el.style.opacity = 1; el.style.transform = 'scale(1)'; } }, 200 + Math.random()*250);
+  }, delay);
+}
+function randomFlicker(){
+  if(!lightsOn) return;
+  const n = 1 + Math.floor(Math.random()*3);
+  for(let i=0;i<n;i++){
+    const el = lights[Math.floor(Math.random()*lights.length)];
+    flickerOnce(el, Math.random()*700);
+  }
+}
+let flickerTimer = setInterval(randomFlicker, 450);
+
+/* toggle by tapping the big card */
+const card = document.getElementById('card');
+card.addEventListener('click', (e)=>{
+  // ignore clicks on control buttons
+  if(e.target.closest('.controls')) return;
+  lightsOn = !lightsOn;
+  if(!lightsOn){
+    lights.forEach(l=>{ l.style.opacity = 0.22; l.style.transform='scale(0.92)'; l.style.filter='grayscale(0.6)'; });
+  } else {
+    lights.forEach(l=>{ l.style.opacity = 1; l.style.transform='scale(1)'; l.style.filter=''; });
+  }
+});
+
+/* controls */
+document.getElementById('toggleLights').addEventListener('click', (ev)=>{
+  ev.stopPropagation();
+  lightsOn = !lightsOn;
+  if(!lightsOn){
+    lights.forEach(l=>{ l.style.opacity = 0.22; l.style.transform='scale(0.92)'; l.style.filter='grayscale(0.6)'; });
+  } else {
+    lights.forEach(l=>{ l.style.opacity = 1; l.style.transform='scale(1)'; l.style.filter=''; });
+  }
+});
+
+/* little buoy motion for ornaments */
+lights.forEach((el, idx)=>{
+  const range = 6 + Math.random()*10;
+  (function loop(i){
+    el.animate([{ transform:'translateY(0px) scale(1)' }, { transform:'translateY(' + (range/2) + 'px) scale(0.98)' }, { transform:'translateY(0px) scale(1)' }], { duration: 2600 + Math.random()*2600, iterations: Infinity, delay: Math.random()*800 });
+  })(idx);
+});
+
+/* ---------- simple WebAudio melody (no external file) ---------- */
+let audioCtx = null;
+let playing = false;
+let masterGain;
+let melodyInterval;
+document.getElementById('toggleMusic').addEventListener('click', async (ev)=>{
+  ev.stopPropagation();
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.08;
+    masterGain.connect(audioCtx.destination);
+  }
+  if(!playing){
+    // resume if suspended (browsers require user gesture - we have it)
+    if(audioCtx.state === 'suspended') await audioCtx.resume();
+    startMelody();
+  } else {
+    stopMelody();
+  }
+});
+
+function startMelody(){
+  playing = true;
+  // simple arpeggio pattern (major-ish)
+  const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5 - pleasant triad arpeggio
+  let idx = 0;
+  melodyInterval = setInterval(()=> {
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = notes[idx % notes.length] * (Math.random()<0.12?0.5:1); // occasional lower note
+    g.gain.value = 0;
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(1, t + 0.02);
+    g.gain.linearRampToValueAtTime(0.0001, t + 0.9);
+    osc.stop(t + 1.02);
+    idx++;
+  }, 420);
+  document.getElementById('toggleMusic').textContent = '⏸️ 音乐';
+}
+function stopMelody(){
+  playing = false;
+  clearInterval(melodyInterval);
+  document.getElementById('toggleMusic').textContent = '🎵 音乐';
+}
+
+/* ---------- small entrance animation ---------- */
+window.addEventListener('load', ()=>{
+  setTimeout(()=> {
+    document.querySelector('.card').animate([{ transform:'scale(0.98)' }, { transform:'scale(1)' }], { duration:450, easing:'cubic-bezier(.2,.8,.2,1)' });
+  }, 120);
+});
+
+/* ---------- accessibility: keyboard toggles ---------- */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'm') document.getElementById('toggleMusic').click();
+  if(e.key === 'l') document.getElementById('toggleLights').click();
+});
+
+/* ---------- small performance: stop snow animation when tab hidden ---------- */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){
+    snow.querySelectorAll('i').forEach((s)=> s.style.animationPlayState='paused');
+    if(audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+  } else {
+    snow.querySelectorAll('i').forEach((s)=> s.style.animationPlayState='running');
+    if(audioCtx && audioCtx.state === 'suspended' && playing) audioCtx.resume();
+  }
+});
+</script>
+</body>
+</html>
